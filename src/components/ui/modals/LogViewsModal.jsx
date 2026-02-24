@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useStarStore } from "../../../store/useStarStore";
 import { getFallbackAnalysis } from "../../../utils/fallbackAnalysis";
 
-export const LogViewsModal = ({ onClose }) => {
+export const LogViewsModal = ({ onClose, onLogClick }) => {
     const { stars } = useStarStore();
 
     // 現在表示中の年月（初期値は現在日時）
@@ -96,6 +96,12 @@ export const LogViewsModal = ({ onClose }) => {
                     opacity: hasStar ? 1 : 0.5,
                     transition: "transform 0.2s",
                     cursor: hasStar ? "pointer" : "default",
+                }}
+                onClick={(e) => {
+                    if (hasStar && star && onLogClick) {
+                        e.stopPropagation();
+                        onLogClick(star);
+                    }
                 }}
                 onMouseEnter={(e) => {
                     if (hasStar) e.currentTarget.style.transform = "scale(1.05)";

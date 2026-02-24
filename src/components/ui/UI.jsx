@@ -603,9 +603,8 @@ export const UI = ({ onSend, onStarClick }) => {
               <div className="flex flex-col md:flex-row md:gap-8">
                 {/* 左: スライダー質問リスト（スマホステップ0 / PC常時） */}
                 <div
-                  className={`flex-1 space-y-6 min-w-0 ${
-                    mobileDiaryStep === 1 ? "hidden md:block" : "block"
-                  }`}
+                  className={`flex-1 space-y-6 min-w-0 ${mobileDiaryStep === 1 ? "hidden md:block" : "block"
+                    }`}
                 >
                   {MOOD_QUESTIONS.map((q) => (
                     <div
@@ -671,9 +670,8 @@ export const UI = ({ onSend, onStarClick }) => {
 
                 {/* 右: 今日のいいこと入力 + 打ち上げボタン（スマホステップ1 / PC常時） */}
                 <div
-                  className={`flex flex-1 flex-col gap-5 md:gap-4 ${
-                    mobileDiaryStep === 0 ? "hidden md:flex" : "flex"
-                  }`}
+                  className={`flex flex-1 flex-col gap-5 md:gap-4 ${mobileDiaryStep === 0 ? "hidden md:flex" : "flex"
+                    }`}
                 >
                   <div className="space-y-2">
                     <label className="text-white/90 text-sm font-sans tracking-wide block">
@@ -776,7 +774,13 @@ export const UI = ({ onSend, onStarClick }) => {
 
       {/* --- ログ一覧モーダル --- */}
       {logModalOpen && (
-        <LogViewsModal onClose={() => setLogModalOpen(false)} />
+        <LogViewsModal
+          onClose={() => setLogModalOpen(false)}
+          onLogClick={(starData) => {
+            setLogModalOpen(false);
+            showStarDetails(starData);
+          }}
+        />
       )}
 
       {/* --- プロフィールモーダル (Profile Modal) --- */}
