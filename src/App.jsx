@@ -46,7 +46,7 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setSession(session);
-        setUser({ id: session.user.id, email: session.user.email });
+        setUser({ id: session.user.id, email: session.user.email, created_at: session.user.created_at });
         // すでにログイン済みなら、ログイン画面などはスキップしてアプリを表示
         setShowApp(true);
         setPhase('app');
@@ -61,7 +61,7 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(session ? { id: session.user.id, email: session.user.email } : null);
+      setUser(session ? { id: session.user.id, email: session.user.email, created_at: session.user.created_at } : null);
 
       // ログアウトされた場合はログイン画面に戻すなどの処理が必要ならここに書く
       if (!session) {
