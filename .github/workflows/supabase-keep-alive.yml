@@ -1,0 +1,49 @@
+# Supabase 無料プランは、DB へのクエリが少ない状態が約 7 日続くとプロジェクトを一時停止する。
+# 公式の目安（毎日数回のリクエスト）に合わせて、t_stars テーブルへの SELECT を 1 日 2 回送る。
+# 一時停止後はこのワークフローでは復旧できないため、失敗したらダッシュボードで Resume すること。
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # 毎日 03:00 / 15:00 UTC（日本時間 12:00 / 24:00）
+    - cron: "0 3,15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Query t_stars table
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_KEY}" ]; then
+            echo "::error::GitHub Secrets に SUPABASE_URL と SUPABASE_PUBLISHABLE_KEY を設定してください。"
+            exit 1
+          fi
+
+          url="${SUPABASE_URL%/}/rest/v1/t_stars?select=id&limit=1"
+
+          status=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" \
+            --max-time 30 --retry 3 --retry-delay 10 --retry-all-errors \
+            --header "apikey: ${SUPABASE_KEY}" \
+            --header "Authorization: Bearer ${SUPABASE_KEY}" \
+            "${url}") || {
+            echo "::error::Supabase に接続できません。プロジェクトが一時停止されていないか、ダッシュボードで確認してください。"
+            exit 1
+          }
+
+          echo "t_stars への SELECT: HTTP ${status}"
+
+          if [ "${status}" -lt 200 ] || [ "${status}" -ge 300 ]; then
+            echo "::error::クエリが失敗しました (HTTP ${status})。キーと t_stars テーブルの RLS（SELECT）を確認してください。"
+            exit 1
+          fi
